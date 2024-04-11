@@ -2,8 +2,6 @@ package api
 
 import (
 	"net/http"
-
-	"github.com/mirhijinam/avito-trainee-2024/internal/service"
 )
 
 type deleteBannerRequest struct {
@@ -13,7 +11,7 @@ type deleteBannerRequest struct {
 	Offset    int   `json:"offset"`
 }
 
-func deleteBanner(bs *service.BannerService) http.HandlerFunc {
+func deleteBanner(bs BannerService) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 	}
 }

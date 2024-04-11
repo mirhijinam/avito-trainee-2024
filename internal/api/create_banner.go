@@ -2,8 +2,6 @@ package api
 
 import (
 	"net/http"
-
-	"github.com/mirhijinam/avito-trainee-2024/internal/service"
 )
 
 type createBannerRequest struct {
@@ -13,7 +11,7 @@ type createBannerRequest struct {
 	IsActive       bool   `json:"is_active"`
 }
 
-func createBanner(bs *service.BannerService) http.HandlerFunc {
+func createBanner(bs BannerService) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 	}
 }

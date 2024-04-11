@@ -2,8 +2,6 @@ package api
 
 import (
 	"net/http"
-
-	"github.com/mirhijinam/avito-trainee-2024/internal/service"
 )
 
 type getBannerRequest struct {
@@ -12,7 +10,7 @@ type getBannerRequest struct {
 	UseLastRevision bool  `json:"use_last_revision"`
 }
 
-func getBanner(bs *service.BannerService) http.HandlerFunc {
+func getBanner(bs BannerService) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 	}
 }

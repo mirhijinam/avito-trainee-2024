@@ -1,12 +1,13 @@
 package service
 
-import repo "github.com/mirhijinam/avito-trainee-2024/internal/repository"
-
-type BannerService struct {
-	repo *repo.BannerRepository
+type BannerRepository interface {
 }
 
-func New(repo *repo.BannerRepository) *BannerService {
+type BannerService struct {
+	repo BannerRepository
+}
+
+func New(repo BannerRepository) *BannerService {
 	return &BannerService{
 		repo: repo,
 	}
