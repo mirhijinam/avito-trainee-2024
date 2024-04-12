@@ -2,39 +2,32 @@ package db
 
 import (
 	"context"
+	"database/sql"
 	"fmt"
 	"log"
 
+	_ "github.com/lib/pq"
 	"github.com/mirhijinam/avito-trainee-2024/internal/config"
-
-	"github.com/jackc/pgx/v5/pgxpool"
 )
 
-func MustOpenDB(ctx context.Context, cfg config.DBConfig) *pgxpool.Pool {
-	// create default pool config
-	config, err := pgxpool.ParseConfig("")
+func MustOpenDB(ctx context.Context, cfg config.DBConfig) *sql.DB {
+	// construct the dsn
+	dsn := fmt.Sprintf(
+		"user=%s password=%s host=%s port=%d dbname=%s sslmode=disable",
+		cfg.PgUser, cfg.PgPass, cfg.PgHost, cfg.PgPort, cfg.PgDb,
+	)
+
+	// open db
+	db, err := sql.Open("postgres", dsn)
 	if err != nil {
-		log.Fatalf("failed to parse config (OpenDB): %w", err)
+		log.Fatalf("failed to open database: %v", err)
 	}
 
-	// fill pool config
-	config.ConnConfig.User = cfg.PgUser
-	config.ConnConfig.Password = cfg.PgPass
-	config.ConnConfig.Host = cfg.PgHost
-	config.ConnConfig.Port = cfg.PgPort
-	config.ConnConfig.Database = cfg.PgDb
-
-	// try to create new connection pool
-	pool, err := pgxpool.NewWithConfig(ctx, config)
-	if err != nil {
-		log.Fatalf("failed to connect (OpenDB): %w", err)
-	}
-
-	// check is it alive
-	if err = pool.Ping(ctx); err != nil {
-		log.Fatalf("failed to ping (OpenDB): %w", err)
+	// check if db is alive
+	if err = db.PingContext(ctx); err != nil {
+		log.Fatalf("failed to ping database: %v", err)
 	}
 
 	fmt.Println("success")
-	return pool
+	return db
 }
