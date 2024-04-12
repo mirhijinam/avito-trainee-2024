@@ -2,11 +2,16 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"log"
+	"net/http"
 
 	_ "github.com/lib/pq"
+	"github.com/mirhijinam/avito-trainee-2024/internal/api"
 	"github.com/mirhijinam/avito-trainee-2024/internal/config"
 	"github.com/mirhijinam/avito-trainee-2024/internal/pkg/db"
+	"github.com/mirhijinam/avito-trainee-2024/internal/repository"
+	"github.com/mirhijinam/avito-trainee-2024/internal/service"
 )
 
 func main() {
@@ -16,13 +21,39 @@ func main() {
 	}
 
 	ctx := context.Background()
-	_ = db.MustOpenDB(ctx, dbCfg)
+	conn := db.MustOpenDB(ctx, dbCfg)
 
 	srvCfg := config.GetServerConfig()
 
 	log.Println("Server has been successfully started on the port " + srvCfg.HTTPPort)
 
-	for {
+	br := repository.New(conn)
+	bs := service.New(br)
+
+	h := api.New(bs)
+
+	mux := http.NewServeMux()
+	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		if r.Method == "GET" {
+			fmt.Fprintln(w, "Hi there!")
+		} else {
+			http.Error(w, "Invalid request method", http.StatusMethodNotAllowed)
+		}
+	})
+	mux.HandleFunc("GET /user_banner", h.GetBanner())
+	mux.HandleFunc("GET /banner", h.GetBannerList())
+	mux.HandleFunc("POST /banner", h.CreateBanner())
+	mux.HandleFunc("PATCH /banner/{id}", h.UpdateBanner())
+	mux.HandleFunc("DELETE /banner/{id}", h.DeleteBanner())
+
+	srv := http.Server{
+		Addr:    srvCfg.HTTPPort,
+		Handler: mux,
+	}
+	log.Println("Server is starting on port " + srvCfg.HTTPPort)
+
+	if err := srv.ListenAndServe(); err != nil {
+		log.Fatalf("failed to start server: %v", err)
 	}
 
 }
