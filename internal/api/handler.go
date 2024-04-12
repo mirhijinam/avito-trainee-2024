@@ -15,6 +15,9 @@ func New(bs BannerService) *Handler {
 		BannerService: bs,
 	}
 }
+func (h *Handler) successResponse(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusOK)
+}
 func (h *Handler) logError(r *http.Request, err error) {
 	log.Println(err)
 }
