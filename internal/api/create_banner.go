@@ -11,7 +11,12 @@ type createBannerRequest struct {
 	IsActive       bool   `json:"is_active"`
 }
 
-func createBanner(bs BannerService) http.HandlerFunc {
+func (h *Handler) CreateBanner() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		input := createBannerRequest{}
+		err := readJSON(w, r, &input)
+		if err != nil {
+			h.badRequestResponse(w, r, err)
+		}
 	}
 }

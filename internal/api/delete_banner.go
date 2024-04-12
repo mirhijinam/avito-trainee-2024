@@ -11,7 +11,7 @@ type deleteBannerRequest struct {
 	Offset    int   `json:"offset"`
 }
 
-func deleteBanner(bs BannerService) http.HandlerFunc {
+func (h *Handler) DeleteBanner() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 	}
 }

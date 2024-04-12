@@ -11,7 +11,7 @@ type getBannerListRequest struct {
 	Offset    int   `json:"offset"`
 }
 
-func getBannerList(bs BannerService) http.HandlerFunc {
+func (h *Handler) GetBannerList() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 	}
 }

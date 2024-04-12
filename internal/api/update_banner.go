@@ -8,7 +8,7 @@ type updateBannerRequest struct {
 	Id int `json:"id"`
 }
 
-func updateBanner(bs BannerService) http.HandlerFunc {
+func (h *Handler) UpdateBanner() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 	}
 }
