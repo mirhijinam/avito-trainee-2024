@@ -17,11 +17,12 @@ CREATE TABLE banners (
     id              serial PRIMARY KEY,
     feature_id      integer NOT NULL,
     additional_info jsonb,
+    is_active       boolean,
     FOREIGN KEY (feature_id) REFERENCES features(id)
 );
 
 -- many-to-many between banners and tags
-CREATE TABLE banner_tags (
+CREATE TABLE banners_tags (
     banner_id integer NOT NULL,
     tag_id    integer NOT NULL,
     PRIMARY KEY (banner_id, tag_id),
