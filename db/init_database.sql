@@ -1,30 +1,30 @@
+-- one-to-many between tags and users
 CREATE TABLE users (
-    id          serial PRIMARY KEY
+    id serial PRIMARY KEY,
+    tag_id integer,
+    FOREIGN KEY (tag_id) REFERENCES tags(id) ON DELETE SET NULL
 );
 
 CREATE TABLE tags (
-    id          serial PRIMARY KEY
-);
-
-CREATE TABLE users_tags (
-    id              serial PRIMARY KEY,
-    user_id         integer,
-    tag_id          integer,
-
-    CONSTRAINT user_tag_unique UNIQUE (user_id, tag_id)
+    id serial PRIMARY KEY
 );
 
 CREATE TABLE features (
-    id          serial PRIMARY KEY
+    id serial PRIMARY KEY
 );
 
 CREATE TABLE banners (
-    id                      serial PRIMARY KEY,            
-    feature_id              integer NOT null,
-    tag_ids                 integer[] NOT null,
-    additional_info         jsonb,
-
-    FOREIGN KEY (feature_id)            REFERENCES features(id),
-    FOREIGN KEY (tag_id)                REFERENCES tags(id)
+    id              serial PRIMARY KEY,
+    feature_id      integer NOT NULL,
+    additional_info jsonb,
+    FOREIGN KEY (feature_id) REFERENCES features(id)
 );
 
+-- many-to-many between banners and tags
+CREATE TABLE banner_tags (
+    banner_id integer NOT NULL,
+    tag_id    integer NOT NULL,
+    PRIMARY KEY (banner_id, tag_id),
+    FOREIGN KEY (banner_id) REFERENCES banners(id) ON DELETE CASCADE,
+    FOREIGN KEY (tag_id) REFERENCES tags(id) ON DELETE RESTRICT
+);
