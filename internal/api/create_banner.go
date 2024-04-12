@@ -41,8 +41,9 @@ func (h *Handler) CreateBanner() http.HandlerFunc {
 			err := h.BannerService.CreateBanner(b)
 			if err != nil {
 				h.badRequestResponse(w, r, err)
+			} else {
+				h.successResponse(w, r)
 			}
-			h.successResponse(w, r)
 		}
 
 	}

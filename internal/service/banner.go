@@ -1,6 +1,8 @@
 package service
 
-import "encoding/json"
+import (
+	"encoding/json"
+)
 
 type Banner struct {
 	Id             int
@@ -11,7 +13,9 @@ type Banner struct {
 }
 
 type BannerRepository interface {
-	Insert(banner *Banner) error
+	InsertBanner(*Banner) error
+	ExistsTagId(*Banner) error
+	ExistsFeatureId(*Banner) error
 }
 
 type BannerService struct {
@@ -25,13 +29,14 @@ func New(repo BannerRepository) *BannerService {
 }
 
 func (bs *BannerService) CreateBanner(b Banner) error {
-	// need some validation
-	err := bs.repo.Insert(&b)
-	if err != nil {
+	if err := bs.repo.ExistsTagId(&b); err != nil {
+		return err
+	}
+
+	// TODO: need some banner validation
+	if err := bs.repo.InsertBanner(&b); err != nil {
 		return err
 	}
 
 	return nil
 }
-
-// TODO: somehow implement CreateBannerTag (for relation table)
