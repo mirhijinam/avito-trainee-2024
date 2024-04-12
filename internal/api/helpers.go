@@ -6,9 +6,25 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"os"
+
+	_ "github.com/golang-jwt/jwt/v5"
 )
 
 type envelope map[string]interface{}
+
+func validateJWT(tokenString string) int {
+	ajwt := os.Getenv("ADMIN_TOKEN")
+	ujwt := os.Getenv("USER_TOKEN")
+	switch {
+	case tokenString == ujwt:
+		return 0
+	case tokenString == ajwt:
+		return 1
+	default:
+		return -1
+	}
+}
 
 func readJSON(w http.ResponseWriter, r *http.Request, dst interface{}) error {
 	maxBytes := 1_048_576

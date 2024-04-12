@@ -25,8 +25,18 @@ func (h *Handler) errorResponse(w http.ResponseWriter, r *http.Request, status i
 	err := writeJSON(w, status, env, nil)
 	if err != nil {
 		h.logError(r, err)
-		w.WriteHeader(500)
+		w.WriteHeader(http.StatusInternalServerError)
 	}
+}
+
+func (h *Handler) userUnauthorizedResponse(w http.ResponseWriter, r *http.Request) {
+	msg := "user is unauthorized"
+	h.errorResponse(w, r, http.StatusUnauthorized, msg)
+}
+
+func (h *Handler) forbiddenAccessResponse(w http.ResponseWriter, r *http.Request) {
+	msg := "user has no access"
+	h.errorResponse(w, r, http.StatusForbidden, msg)
 }
 
 func (h *Handler) serverErrorResponse(w http.ResponseWriter, r *http.Request, err error) {
