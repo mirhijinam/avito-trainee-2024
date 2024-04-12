@@ -1,12 +1,12 @@
+CREATE TABLE tags (
+    id serial PRIMARY KEY
+);
+
 -- one-to-many between tags and users
 CREATE TABLE users (
     id serial PRIMARY KEY,
     tag_id integer,
     FOREIGN KEY (tag_id) REFERENCES tags(id) ON DELETE SET NULL
-);
-
-CREATE TABLE tags (
-    id serial PRIMARY KEY
 );
 
 CREATE TABLE features (
