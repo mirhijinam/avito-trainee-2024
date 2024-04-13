@@ -1,9 +1,11 @@
-# Run compose-up
-compose-up: 
+up: 
 	docker-compose up --build -d && docker-compose logs -f
-.PHONY: compose-up
+.PHONY: up
 
-# Run test
+down: 
+	docker-compose down --volumes
+.PHONY: down
+
 test: 
 	go test -v ./...
 .PHONY: test

@@ -25,8 +25,6 @@ func main() {
 
 	srvCfg := config.GetServerConfig()
 
-	log.Println("Server has been successfully started on the port " + srvCfg.HTTPPort)
-
 	br := repository.New(conn)
 	bs := service.New(br)
 
