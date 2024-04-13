@@ -90,3 +90,8 @@ func (bs *BannerService) GetBannerFromDB(qm map[string]interface{}) (json.RawMes
 	}
 	return ans, nil
 }
+
+func (bs *BannerService) GetBannerFromCache(qm map[string]interface{}) (json.RawMessage, error) {
+
+	return nil, nil
+}
