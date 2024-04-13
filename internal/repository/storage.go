@@ -158,25 +158,26 @@ func (br BannerRepository) SelectBannerListFromDB(args []interface{}) ([]interfa
 	return bannerResponseList, nil
 }
 
-func (br BannerRepository) SelectBannerFromDB(args []interface{}) (json.RawMessage, error) {
+func (br BannerRepository) SelectBannerFromDB(args []interface{}) (bool, json.RawMessage, error) {
 	bannerQuery := `
-	SELECT b.content FROM banners b
+	SELECT b.is_active, b.content FROM banners b
 	INNER JOIN 
 		banners_tags bt ON b.id = bt.banner_id
 	WHERE b.feature_id = $1 AND bt.tag_id = $2;       
     `
 	stmt, err := br.db.Prepare(bannerQuery)
 	if err != nil {
-		return nil, err
+		return false, nil, err
 	}
 	defer stmt.Close()
 
+	var isActive bool
 	var content json.RawMessage
 
-	err = stmt.QueryRow(args...).Scan(&content)
+	err = stmt.QueryRow(args...).Scan(&isActive, &content)
 	if err != nil {
-		return nil, err
+		return false, nil, err
 	}
 
-	return content, nil
+	return isActive, content, nil
 }

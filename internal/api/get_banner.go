@@ -35,15 +35,14 @@ func (h *Handler) GetBanner() http.HandlerFunc {
 		res := make(map[string]interface{})
 		if queryMap["useLastRevision"] == true { // DB
 			fmt.Println("debug! checking the use last revision")
-			bodyContain, err := h.BannerService.GetBannerFromDB(queryMap)
-			fmt.Println(bodyContain)
-
-			fmt.Println(bodyContain)
-			res["content"] = bodyContain
+			isActive, bodyContain, err := h.BannerService.GetBannerFromDB(queryMap)
 
 			if err != nil {
 				h.badRequestResponse(w, r, err)
+			} else if validateJWT(inpToken) == 0 && !isActive {
+				h.forbiddenAccessResponse(w, r)
 			} else {
+				res["content"] = bodyContain
 				h.successGetBannerResponse(w, r, res)
 			}
 

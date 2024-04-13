@@ -79,16 +79,16 @@ func (bs *BannerService) GetBannerListFromDB(qm map[string]interface{}) ([]inter
 	return ans, nil
 }
 
-func (bs *BannerService) GetBannerFromDB(qm map[string]interface{}) (json.RawMessage, error) {
+func (bs *BannerService) GetBannerFromDB(qm map[string]interface{}) (bool, json.RawMessage, error) {
 	args := make([]interface{}, 2)
 	args[0] = qm["featureId"]
 	args[1] = qm["tagId"]
 
-	ans, err := bs.repo.SelectBannerFromDB(args)
+	isActive, content, err := bs.repo.SelectBannerFromDB(args)
 	if err != nil {
-		return nil, err
+		return false, nil, err
 	}
-	return ans, nil
+	return isActive, content, nil
 }
 
 func (bs *BannerService) GetBannerFromCache(qm map[string]interface{}) (json.RawMessage, error) {
