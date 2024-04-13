@@ -5,6 +5,7 @@ import (
 	"net/http"
 )
 
+// TODO:
 type getBannerRequest struct {
 	FeatureId       int   `json:"feature_id"`
 	TagId           []int `json:"tag_ids"`
@@ -13,6 +14,7 @@ type getBannerRequest struct {
 
 func (h *Handler) GetBanner() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+
 		fmt.Println("get banner handler")
 		return
 	}

@@ -3,15 +3,18 @@ package api
 import (
 	"encoding/json"
 	"net/http"
+	"time"
 
 	"github.com/mirhijinam/avito-trainee-2024/internal/service"
 )
 
+// TODO: implement version control as {v1{...}, v2{...}, v3{...}}
+
 type createBannerRequest struct {
-	FeatureId      int             `json:"feature_id"`
-	TagIds         []int           `json:"tag_ids"`
-	AdditionalInfo json.RawMessage `json:"content"`
-	IsActive       bool            `json:"is_active"`
+	FeatureId int             `json:"feature_id"`
+	TagIds    []int           `json:"tag_ids"`
+	Content   json.RawMessage `json:"content"`
+	IsActive  bool            `json:"is_active"`
 }
 
 func (h *Handler) CreateBanner() http.HandlerFunc {
@@ -26,23 +29,25 @@ func (h *Handler) CreateBanner() http.HandlerFunc {
 			return
 		}
 
-		err := readJSON(w, r, &input)
+		err := readJSONBody(w, r, &input)
 		if err != nil {
 			h.badRequestResponse(w, r, err)
 		}
 
 		for _, tagId := range input.TagIds {
 			b := service.Banner{
-				FeatureId:      input.FeatureId,
-				TagId:          tagId,
-				AdditionalInfo: input.AdditionalInfo,
-				IsActive:       input.IsActive,
+				FeatureId: input.FeatureId,
+				TagId:     tagId,
+				Content:   input.Content,
+				IsActive:  input.IsActive,
+				CreatedAt: time.Now(),
+				UpdatedAt: time.Now(),
 			}
 			err := h.BannerService.CreateBanner(b)
 			if err != nil {
 				h.badRequestResponse(w, r, err)
 			} else {
-				h.successResponse(w, r)
+				h.successBannerCreationResponse(w, r)
 			}
 		}
 

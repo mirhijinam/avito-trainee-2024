@@ -7,6 +7,7 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"strconv"
 
 	_ "github.com/golang-jwt/jwt/v5"
 )
@@ -26,10 +27,63 @@ func validateJWT(tokenString string) int {
 	}
 }
 
-func readJSON(w http.ResponseWriter, r *http.Request, dst interface{}) error {
+func readJSONQuery(r *http.Request) (map[string]interface{}, error) {
+	params := &getBannerListRequest{}
+	q := r.URL.Query()
+
+	parseInt := func(key string) (*int, error) {
+		if value, present := q[key]; present && len(value) > 0 {
+			i, err := strconv.Atoi(value[0])
+			if err != nil {
+				return nil, err
+			}
+			return &i, nil
+		}
+		return nil, nil
+	}
+
+	var err error
+	if params.FeatureId, err = parseInt("feature_id"); err != nil {
+		return nil, err
+	}
+	if params.TagId, err = parseInt("tag_id"); err != nil {
+		return nil, err
+	}
+	if params.Limit, err = parseInt("limit"); err != nil {
+		return nil, err
+	}
+	if params.Offset, err = parseInt("offset"); err != nil {
+		return nil, err
+	}
+
+	queryMap := map[string]interface{}{
+		"featureId": nil,
+		"tagId":     nil,
+		"limit":     nil,
+		"offset":    nil,
+	}
+
+	if params.FeatureId != nil {
+		queryMap["featureId"] = *params.FeatureId
+	}
+	if params.TagId != nil {
+		queryMap["tagId"] = *params.TagId
+	}
+	if params.Limit != nil {
+		queryMap["limit"] = *params.Limit
+	}
+	if params.Offset != nil {
+		queryMap["offset"] = *params.Offset
+	}
+
+	return queryMap, nil
+}
+
+func readJSONBody(w http.ResponseWriter, r *http.Request, dst interface{}) error {
 	maxBytes := 1_048_576
 	r.Body = http.MaxBytesReader(w, r.Body, int64(maxBytes))
 	dec := json.NewDecoder(r.Body)
+
 	dec.DisallowUnknownFields()
 	err := dec.Decode(dst)
 
@@ -51,8 +105,8 @@ func readJSON(w http.ResponseWriter, r *http.Request, dst interface{}) error {
 			}
 			return fmt.Errorf("body contains incorrect JSON type (at character %d)", unmarshalTypeError.Offset)
 
-		case errors.Is(err, io.EOF):
-			return errors.New("body must not be empty")
+		// case errors.Is(err, io.EOF):
+		//	return errors.New("body must not be empty")
 
 		case err.Error() == "http: request body too large":
 			return fmt.Errorf("body must not be larger than %d bytes", maxBytes)
@@ -73,7 +127,7 @@ func readJSON(w http.ResponseWriter, r *http.Request, dst interface{}) error {
 	return nil
 }
 
-func writeJSON(w http.ResponseWriter, status int, data envelope, headers http.Header) error {
+func writeJSONBody(w http.ResponseWriter, status int, data envelope, headers http.Header) error {
 	js, err := json.MarshalIndent(data, "", "\t")
 	if err != nil {
 		return err
@@ -86,7 +140,7 @@ func writeJSON(w http.ResponseWriter, status int, data envelope, headers http.He
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(status)
+	// w.WriteHeader(status)
 
 	w.Write(js)
 
