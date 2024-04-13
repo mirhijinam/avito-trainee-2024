@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
+	"strconv"
 
 	_ "github.com/lib/pq"
 	"github.com/mirhijinam/avito-trainee-2024/internal/api"
@@ -26,8 +28,9 @@ func main() {
 	srvCfg := config.GetServerConfig()
 
 	br := repository.New(conn)
-	bs := service.New(br)
-
+	lruSz, err := strconv.Atoi(os.Getenv("LRU_CACHE_SIZE"))
+	fmt.Println("debug! lrucache size:", lruSz)
+	bs := service.New(br, lruSz)
 	h := api.New(bs)
 
 	mux := http.NewServeMux()

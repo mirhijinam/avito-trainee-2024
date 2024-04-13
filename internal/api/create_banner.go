@@ -2,6 +2,7 @@ package api
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"time"
 
@@ -43,7 +44,8 @@ func (h *Handler) CreateBanner() http.HandlerFunc {
 				CreatedAt: time.Now(),
 				UpdatedAt: time.Now(),
 			}
-			err := h.BannerService.CreateBanner(b)
+			err := h.BannerService.CreateBanner(&b)
+			fmt.Println("debug! api: b.Id =", b.Id)
 			if err != nil {
 				h.badRequestResponse(w, r, err)
 			} else {

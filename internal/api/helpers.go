@@ -73,6 +73,7 @@ func readJSONGetBannerQuery(r *http.Request) (map[string]interface{}, error) {
 	queryMap["featureId"] = *params.FeatureId
 	queryMap["tagId"] = *params.TagId
 
+	fmt.Println("debug! useLastRevision", *params.UseLastRevision)
 	if params.UseLastRevision != nil {
 		queryMap["useLastRevision"] = *params.UseLastRevision
 	}

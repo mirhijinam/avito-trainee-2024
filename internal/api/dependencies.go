@@ -7,7 +7,7 @@ import (
 )
 
 type BannerService interface {
-	CreateBanner(b service.Banner) error
+	CreateBanner(b *service.Banner) error
 	GetBannerListFromDB(map[string]interface{}) ([]interface{}, error)
 	GetBannerFromDB(map[string]interface{}) (json.RawMessage, error)
 	// GetBannerFromLRUCache(map[string]interface{}) (interface{}, error)

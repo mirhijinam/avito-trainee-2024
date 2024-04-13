@@ -61,7 +61,7 @@ func (br BannerRepository) ExistsTagId(b *service.Banner) error {
 	return nil
 }
 
-func (br BannerRepository) InsertBanner(b *service.Banner) error {
+func (br BannerRepository) InsertBanner(b *service.Banner) (int, error) {
 	bannerQuery := `
 		INSERT INTO banners (feature_id, content, is_active, created_at, updated_at)
 		VALUES ($1, $2, $3, $4, $5)
@@ -71,9 +71,12 @@ func (br BannerRepository) InsertBanner(b *service.Banner) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
-	err := br.db.QueryRowContext(ctx, bannerQuery, args...).Scan(&b.Id)
+	var id int
+	err := br.db.QueryRowContext(ctx, bannerQuery, args...).Scan(&id)
+	b.Id = id
+	fmt.Println("debug! repo: b.Id", b.Id)
 	if err != nil {
-		return err
+		return -1, err
 	}
 
 	relBannersTagsQuery := `
@@ -82,16 +85,16 @@ func (br BannerRepository) InsertBanner(b *service.Banner) error {
 
 	stmt, err := br.db.Prepare(relBannersTagsQuery)
 	if err != nil {
-		return err
+		return -1, err
 	}
 	defer stmt.Close()
 
 	_, err = stmt.Exec(b.Id, b.TagId)
 	if err != nil {
-		return err
+		return -1, err
 	}
 
-	return nil
+	return id, err
 }
 
 func (br BannerRepository) SelectBannerListFromDB(args []interface{}) ([]interface{}, error) {
