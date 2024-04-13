@@ -27,7 +27,59 @@ func validateJWT(tokenString string) int {
 	}
 }
 
-func readJSONQuery(r *http.Request) (map[string]interface{}, error) {
+func readJSONGetBannerQuery(r *http.Request) (map[string]interface{}, error) {
+	params := &getBannerRequest{}
+	q := r.URL.Query()
+
+	parseInt := func(key string) (*int, error) {
+		if value, present := q[key]; present && len(value) > 0 {
+			i, err := strconv.Atoi(value[0])
+			if err != nil {
+				return nil, err
+			}
+			return &i, nil
+		}
+		return nil, nil
+	}
+
+	parseBool := func(key string) (*bool, error) {
+		if value, present := q[key]; present && len(value) > 0 {
+			b, err := strconv.ParseBool(value[0])
+			if err != nil {
+				return nil, err
+			}
+			return &b, nil
+		}
+		return nil, nil
+	}
+
+	var err error
+	if params.FeatureId, err = parseInt("feature_id"); err != nil {
+		return nil, err
+	}
+	if params.TagId, err = parseInt("tag_id"); err != nil {
+		return nil, err
+	}
+	if params.UseLastRevision, err = parseBool("use_last_revision"); err != nil {
+		return nil, err
+	}
+
+	queryMap := map[string]interface{}{
+		"featureId":       nil,
+		"tagId":           nil,
+		"useLastRevision": false,
+	}
+
+	queryMap["featureId"] = *params.FeatureId
+	queryMap["tagId"] = *params.TagId
+
+	if params.UseLastRevision != nil {
+		queryMap["useLastRevision"] = *params.UseLastRevision
+	}
+
+	return queryMap, nil
+}
+func readJSONGetBannerListQuery(r *http.Request) (map[string]interface{}, error) {
 	params := &getBannerListRequest{}
 	q := r.URL.Query()
 

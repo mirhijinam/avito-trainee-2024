@@ -35,8 +35,17 @@ func (h *Handler) GetBannerList() http.HandlerFunc {
 			return
 		}
 
-		queryMap, err := readJSONQuery(r)
+		queryMap, err := readJSONGetBannerListQuery(r)
+		if err != nil {
+			fmt.Errorf("error! failed to read json request")
+			return
+		}
+
 		bodyContain, err := h.BannerService.GetBannerListFromDB(queryMap)
+		if err != nil {
+			fmt.Errorf("error! failed to GetBannerListFromDB")
+			return
+		}
 		res := make(map[string]interface{})
 		for _, item := range bodyContain {
 			bResponse, ok := item.(BannerResponse)
@@ -50,10 +59,6 @@ func (h *Handler) GetBannerList() http.HandlerFunc {
 			res["is_active"] = bResponse.IsActive
 			res["created_at"] = bResponse.CreatedAt
 			res["updated_at"] = bResponse.UpdatedAt
-		}
-		if err != nil {
-			fmt.Errorf("error! cannot read json query")
-			return
 		}
 
 		if err != nil {

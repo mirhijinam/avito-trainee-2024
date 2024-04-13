@@ -30,12 +30,16 @@ func (h *Handler) responseCreator(w http.ResponseWriter, r *http.Request, status
 
 func (h *Handler) successBannerCreationResponse(w http.ResponseWriter, r *http.Request) {
 	ans := "answer"
-	msg := "error! user is unauthorized"
+	msg := "banner is created successfully"
 	env := envelope{ans: msg}
 	h.responseCreator(w, r, http.StatusOK, env)
 }
 
 func (h *Handler) successGetBannerListResponse(w http.ResponseWriter, r *http.Request, env map[string]interface{}) {
+	h.responseCreator(w, r, http.StatusOK, env)
+}
+
+func (h *Handler) successGetBannerResponse(w http.ResponseWriter, r *http.Request, env map[string]interface{}) {
 	h.responseCreator(w, r, http.StatusOK, env)
 }
 
