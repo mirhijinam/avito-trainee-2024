@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"os"
 	"strconv"
 	"strings"
 )
@@ -20,10 +21,21 @@ type BannerContentResponse struct {
 
 func (h *Handler) GetBanner() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		fmt.Println("debug! i'am in the getbanner")
+		usertokenret, err := strconv.Atoi(os.Getenv("USER_TOKEN_RET"))
+		if err != nil {
+			fmt.Println("debug! failed to convert user token return value")
+			return
+		}
+
+		unauthorizedret, err := strconv.Atoi(os.Getenv("UNAUTHORIZED_RET"))
+		if err != nil {
+			fmt.Println("debug! failed to convert unauthorized return value")
+			return
+		}
+
 		inpToken := r.Header.Get("token")
 		fmt.Println("debug! received token:", inpToken)
-		if validateJWT(inpToken) == -1 {
+		if checkToken(inpToken) == unauthorizedret {
 			h.userUnauthorizedResponse(w, r)
 			return
 		}
@@ -44,9 +56,9 @@ func (h *Handler) GetBanner() http.HandlerFunc {
 				version = v
 			}
 		}
-
 		fmt.Println("debug! version =", version)
-		if validateJWT(inpToken) < 1 && version > 1 {
+
+		if checkToken(inpToken) == usertokenret && version > 1 {
 			h.forbiddenAccessResponse(w, r)
 			return
 		}
@@ -58,7 +70,7 @@ func (h *Handler) GetBanner() http.HandlerFunc {
 
 			if err != nil {
 				h.badRequestResponse(w, r, err)
-			} else if validateJWT(inpToken) == 0 && !isActive {
+			} else if checkToken(inpToken) == 0 && !isActive {
 				h.forbiddenAccessResponse(w, r)
 			} else {
 				res["content"] = bodyContain
@@ -71,7 +83,7 @@ func (h *Handler) GetBanner() http.HandlerFunc {
 			isActive, bodyContain, err := h.BannerService.GetBannerFromCache(queryMap, version)
 			if err != nil {
 				h.badRequestResponse(w, r, err)
-			} else if validateJWT(inpToken) == 0 && !isActive {
+			} else if checkToken(inpToken) == usertokenret && !isActive {
 				h.forbiddenAccessResponse(w, r)
 			} else {
 				res["content"] = bodyContain

@@ -14,16 +14,35 @@ import (
 
 type envelope map[string]interface{}
 
-func validateJWT(tokenString string) int {
-	ajwt := os.Getenv("ADMIN_TOKEN")
-	ujwt := os.Getenv("USER_TOKEN")
-	switch {
-	case tokenString == ujwt:
+func checkToken(token string) int {
+	adminToken := os.Getenv("ADMIN_TOKEN")
+	userToken := os.Getenv("USER_TOKEN")
+
+	admintokenret, err := strconv.Atoi(os.Getenv("ADMIN_TOKEN_RET"))
+	if err != nil {
+		fmt.Println("debug! failed to convert admin token return value")
 		return 0
-	case tokenString == ajwt:
-		return 1
+	}
+
+	usertokenret, err := strconv.Atoi(os.Getenv("USER_TOKEN_RET"))
+	if err != nil {
+		fmt.Println("debug! failed to convert user token return value")
+		return 0
+	}
+
+	unauthorizedret, err := strconv.Atoi(os.Getenv("UNAUTHORIZED_RET"))
+	if err != nil {
+		fmt.Println("debug! failed to convert unauthorized return value")
+		return 0
+	}
+
+	switch token {
+	case userToken:
+		return usertokenret
+	case adminToken:
+		return admintokenret
 	default:
-		return -1
+		return unauthorizedret
 	}
 }
 

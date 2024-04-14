@@ -21,10 +21,10 @@ func (h *Handler) CreateBanner() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		input := createBannerRequest{}
 		inpToken := r.Header.Get("token")
-		if validateJWT(inpToken) == 0 {
+		if checkToken(inpToken) == usertokenret {
 			h.forbiddenAccessResponse(w, r)
 			return
-		} else if validateJWT(inpToken) == -1 {
+		} else if checkToken(inpToken) == unauthorizedret {
 			h.userUnauthorizedResponse(w, r)
 			return
 		}

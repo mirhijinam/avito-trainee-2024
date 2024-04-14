@@ -77,7 +77,7 @@ func (br BannerRepository) InsertBanner(b *service.Banner) (int, error) {
 		"v3": b.Versions.ContentV3,
 	})
 	if err != nil {
-		return -1, fmt.Errorf("failed to serialize content: %w", err)
+		return 0, fmt.Errorf("failed to serialize content: %w", err)
 	}
 
 	args := []interface{}{
@@ -95,7 +95,7 @@ func (br BannerRepository) InsertBanner(b *service.Banner) (int, error) {
 	b.Id = id
 	fmt.Println("debug! repo: b.Id", b.Id)
 	if err != nil {
-		return -1, err
+		return 0, err
 	}
 
 	relBannersTagsQuery := `
@@ -104,13 +104,13 @@ func (br BannerRepository) InsertBanner(b *service.Banner) (int, error) {
 
 	stmt, err := br.db.Prepare(relBannersTagsQuery)
 	if err != nil {
-		return -1, err
+		return 0, err
 	}
 	defer stmt.Close()
 
 	_, err = stmt.Exec(b.Id, b.TagId)
 	if err != nil {
-		return -1, err
+		return 0, err
 	}
 
 	return id, err

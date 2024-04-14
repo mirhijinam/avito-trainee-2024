@@ -49,20 +49,30 @@ func (bs *BannerService) CreateBanner(b *Banner) error {
 	// TODO: banner validation
 
 	id, err := bs.repo.InsertBanner(b)
-	b.Id = id
-	fmt.Println("debug! service: b.Id =", b.Id)
-
 	if err != nil {
 		return err
 	}
+
+	b.Id = id
+	fmt.Println("debug! service: b.Id =", b.Id)
 
 	ft := feature_tag{
 		b.FeatureId,
 		b.TagId,
 	}
-	bs.cache.Add(ft, *b)
-	createdBanner, _ := bs.cache.Peek(ft)
-	contentOfBanner, _ := json.Marshal(&createdBanner.Versions.ContentV1)
+
+	ok := bs.cache.Add(ft, *b)
+	if !ok {
+		return fmt.Errorf("failed to add in cache")
+	}
+	createdBanner, ok := bs.cache.Peek(ft)
+	if !ok {
+		fmt.Println("failed to peek created banner from cache")
+	}
+	contentOfBanner, err := json.Marshal(&createdBanner.Versions.ContentV1)
+	if err != nil {
+		return fmt.Errorf("failed to marshal created banner")
+	}
 	fmt.Println("debug! cache: created b.Id =", b.Id, string(contentOfBanner))
 
 	return nil

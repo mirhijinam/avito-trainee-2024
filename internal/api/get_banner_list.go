@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"os"
+	"strconv"
 	"time"
 )
 
@@ -26,11 +28,23 @@ type BannerResponse struct {
 
 func (h *Handler) GetBannerList() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		usertokenret, err := strconv.Atoi(os.Getenv("USER_TOKEN_RET"))
+		if err != nil {
+			fmt.Println("debug! failed to convert user token return value")
+			return
+		}
+
+		unauthorizedret, err := strconv.Atoi(os.Getenv("UNAUTHORIZED_RET"))
+		if err != nil {
+			fmt.Println("debug! failed to convert unauthorized return value")
+			return
+		}
+
 		inpToken := r.Header.Get("token")
-		if validateJWT(inpToken) == 0 {
+		if checkToken(inpToken) == usertokenret {
 			h.forbiddenAccessResponse(w, r)
 			return
-		} else if validateJWT(inpToken) == -1 {
+		} else if checkToken(inpToken) == unauthorizedret {
 			h.userUnauthorizedResponse(w, r)
 			return
 		}
