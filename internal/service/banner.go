@@ -16,7 +16,7 @@ import (
 
 type BannerService struct {
 	repo  BannerRepository
-	cache lru.Cache[int, Banner]
+	cache lru.Cache[feature_tag, Banner]
 }
 
 type Banner struct {
@@ -53,10 +53,14 @@ func (bs *BannerService) CreateBanner(b *Banner) error {
 		return err
 	}
 
-	bs.cache.Add(b.Id, *b)
-	createdBanner, _ := bs.cache.Peek(b.Id)
+	ft := feature_tag{
+		b.FeatureId,
+		b.TagId,
+	}
+	bs.cache.Add(ft, *b)
+	createdBanner, _ := bs.cache.Peek(ft)
 	contentOfBanner, _ := json.Marshal(&createdBanner.Content)
-	fmt.Println("debug! cache: b.Id =", b.Id, string(contentOfBanner))
+	fmt.Println("debug! cache: created b.Id =", b.Id, string(contentOfBanner))
 
 	return nil
 }
@@ -91,7 +95,15 @@ func (bs *BannerService) GetBannerFromDB(qm map[string]interface{}) (bool, json.
 	return isActive, content, nil
 }
 
-func (bs *BannerService) GetBannerFromCache(qm map[string]interface{}) (json.RawMessage, error) {
+func (bs *BannerService) GetBannerFromCache(qm map[string]interface{}) (bool, json.RawMessage, error) {
+	args := feature_tag{
+		qm["featureId"].(int),
+		qm["tagId"].(int),
+	}
+	banner, ok := bs.cache.Get(args)
+	if !ok {
+		return false, nil, fmt.Errorf("failed to get from cache")
+	}
 
-	return nil, nil
+	return banner.IsActive, banner.Content, nil
 }

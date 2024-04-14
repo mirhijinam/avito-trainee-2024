@@ -19,14 +19,14 @@ type BannerContentResponse struct {
 func (h *Handler) GetBanner() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		inpToken := r.Header.Get("token")
-		fmt.Println("debug! recieved token:", inpToken)
+		fmt.Println("debug! received token:", inpToken)
 		if validateJWT(inpToken) == -1 {
 			h.userUnauthorizedResponse(w, r)
 			return
 		}
 
 		queryMap, err := readJSONGetBannerQuery(r)
-		fmt.Println("debug! recieved query map:", queryMap)
+		fmt.Println("debug! received query map:", queryMap)
 		if err != nil {
 			fmt.Errorf("error! failed to read json request")
 			return
@@ -34,7 +34,7 @@ func (h *Handler) GetBanner() http.HandlerFunc {
 
 		res := make(map[string]interface{})
 		if queryMap["useLastRevision"] == true { // DB
-			fmt.Println("debug! checking the use last revision")
+			fmt.Println("debug! checking the use last revision true")
 			isActive, bodyContain, err := h.BannerService.GetBannerFromDB(queryMap)
 
 			if err != nil {
@@ -46,8 +46,17 @@ func (h *Handler) GetBanner() http.HandlerFunc {
 				h.successGetBannerResponse(w, r, res)
 			}
 
-		} else { // LRU Cache
-			fmt.Println("debug! oops...")
+		} else { // Cache
+			fmt.Println("debug! checking the use last revision false")
+			isActive, bodyContain, err := h.BannerService.GetBannerFromCache(queryMap)
+			if err != nil {
+				h.badRequestResponse(w, r, err)
+			} else if validateJWT(inpToken) == 0 && !isActive {
+				h.forbiddenAccessResponse(w, r)
+			} else {
+				res["content"] = bodyContain
+				h.successGetBannerResponse(w, r, res)
+			}
 		}
 
 		return

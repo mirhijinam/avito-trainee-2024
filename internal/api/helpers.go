@@ -42,17 +42,17 @@ func readJSONGetBannerQuery(r *http.Request) (map[string]interface{}, error) {
 		return nil, nil
 	}
 
-	parseBool := func(key string) (*bool, error) {
-		if value, present := q[key]; present && len(value) > 0 {
-			b, err := strconv.ParseBool(value[0])
-			if err != nil {
-				return nil, err
-			}
-			return &b, nil
+	parseBool := func(key string, defaultVal bool) (bool, error) {
+		value, present := q[key]
+		if !present || len(value) == 0 {
+			return defaultVal, nil
 		}
-		return nil, nil
+		b, err := strconv.ParseBool(value[0])
+		if err != nil {
+			return defaultVal, err
+		}
+		return b, nil
 	}
-
 	var err error
 	if params.FeatureId, err = parseInt("feature_id"); err != nil {
 		return nil, err
@@ -60,7 +60,9 @@ func readJSONGetBannerQuery(r *http.Request) (map[string]interface{}, error) {
 	if params.TagId, err = parseInt("tag_id"); err != nil {
 		return nil, err
 	}
-	if params.UseLastRevision, err = parseBool("use_last_revision"); err != nil {
+	x, err := parseBool("use_last_revision", false)
+	params.UseLastRevision = &x
+	if err != nil {
 		return nil, err
 	}
 
@@ -80,6 +82,7 @@ func readJSONGetBannerQuery(r *http.Request) (map[string]interface{}, error) {
 
 	return queryMap, nil
 }
+
 func readJSONGetBannerListQuery(r *http.Request) (map[string]interface{}, error) {
 	params := &getBannerListRequest{}
 	q := r.URL.Query()
