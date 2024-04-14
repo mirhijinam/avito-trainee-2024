@@ -36,13 +36,13 @@ func main() {
 	mux := http.NewServeMux()
 	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		if r.Method == "GET" {
-			fmt.Fprintln(w, "Hi there!")
+			fmt.Fprintln(w, "hi there!")
 		} else {
-			http.Error(w, "Invalid request method", http.StatusMethodNotAllowed)
+			http.Error(w, "invalid request method", http.StatusMethodNotAllowed)
 		}
 	})
 	mux.HandleFunc("GET /user_banner", h.GetBanner())
-	mux.HandleFunc("GET /banner", h.GetBannerList())
+	mux.HandleFunc("GET /user_banner/", h.GetBanner())
 	mux.HandleFunc("POST /banner", h.CreateBanner())
 	mux.HandleFunc("PATCH /banner/{id}", h.UpdateBanner())
 	mux.HandleFunc("DELETE /banner/{id}", h.DeleteBanner())

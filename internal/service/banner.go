@@ -9,9 +9,6 @@ import (
 	lru "github.com/hashicorp/golang-lru/v2"
 )
 
-// TODO: implement getBannerFromDB with flags use_last_revision and isActive
-// TODO: implement getBannerFromLRUCache:
-//		 (https://github.com/hashicorp/golang-lru)
 // TODO: decide how to dermine the size of the cache
 
 type BannerService struct {
@@ -20,9 +17,9 @@ type BannerService struct {
 }
 
 type Versions struct {
-	ContentV1 json.RawMessage `json:"content"`
-	ContentV2 json.RawMessage `json:"content_v2,omitempty"`
-	ContentV3 json.RawMessage `json:"content_v3,omitempty"`
+	ContentV1 json.RawMessage `json:"v1"`
+	ContentV2 json.RawMessage `json:"v2"`
+	ContentV3 json.RawMessage `json:"v3"`
 }
 
 type Banner struct {
@@ -89,27 +86,51 @@ func (bs *BannerService) GetBannerList(qm map[string]interface{}) ([]interface{}
 	return ans, nil
 }
 
-func (bs *BannerService) GetBannerFromDB(qm map[string]interface{}) (bool, json.RawMessage, error) {
+func (bs *BannerService) GetBannerFromDB(qm map[string]interface{}, v int) (bool, json.RawMessage, error) {
 	args := make([]interface{}, 2)
 	args[0] = qm["featureId"]
 	args[1] = qm["tagId"]
 
-	isActive, content, err := bs.repo.SelectBannerFromDB(args)
+	isActive, content, err := bs.repo.SelectBannerFromDB(args, v)
 	if err != nil {
 		return false, nil, err
 	}
 	return isActive, content, nil
 }
 
-func (bs *BannerService) GetBannerFromCache(qm map[string]interface{}) (bool, json.RawMessage, error) {
+func (bs *BannerService) GetBannerFromCache(qm map[string]interface{}, v int) (bool, json.RawMessage, error) {
 	args := feature_tag{
 		qm["featureId"].(int),
 		qm["tagId"].(int),
 	}
+
 	banner, ok := bs.cache.Get(args)
 	if !ok {
 		return false, nil, fmt.Errorf("failed to get from cache")
 	}
 
-	return banner.IsActive, banner.Versions.ContentV1, nil
+	versionsJSON, err := json.Marshal(banner.Versions)
+	if err != nil {
+		fmt.Println("failed marshaling versions:", err)
+	} else {
+		fmt.Println("debug! raw content:", string(versionsJSON))
+	}
+
+	var versions Versions
+	err = json.Unmarshal(versionsJSON, &versions)
+	if err != nil {
+		return false, nil, fmt.Errorf("failed to unmarshal content: %v", err)
+	}
+
+	var retContent json.RawMessage
+	switch v {
+	case 1:
+		retContent = versions.ContentV1
+	case 2:
+		retContent = versions.ContentV2
+	case 3:
+		retContent = versions.ContentV3
+	}
+
+	return banner.IsActive, retContent, nil
 }

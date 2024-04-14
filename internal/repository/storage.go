@@ -186,7 +186,7 @@ func (br BannerRepository) SelectBannerList(args []interface{}) ([]interface{}, 
 	return bannerResponseList, nil
 }
 
-func (br BannerRepository) SelectBannerFromDB(args []interface{}) (bool, json.RawMessage, error) {
+func (br BannerRepository) SelectBannerFromDB(args []interface{}, v int) (bool, json.RawMessage, error) {
 	bannerQuery := `
 	SELECT b.is_active, b.content FROM banners b
 	INNER JOIN 
@@ -207,5 +207,23 @@ func (br BannerRepository) SelectBannerFromDB(args []interface{}) (bool, json.Ra
 		return false, nil, err
 	}
 
-	return isActive, content, nil
+	fmt.Println("debug! raw content:", string(content))
+
+	var versions service.Versions
+	err = json.Unmarshal(content, &versions)
+	if err != nil {
+		return false, nil, fmt.Errorf("failed to unmarshal content: %v", err)
+	}
+
+	var retContent json.RawMessage
+	switch v {
+	case 1:
+		retContent = versions.ContentV1
+	case 2:
+		retContent = versions.ContentV2
+	case 3:
+		retContent = versions.ContentV3
+	}
+
+	return isActive, retContent, nil
 }

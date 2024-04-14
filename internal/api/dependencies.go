@@ -9,6 +9,6 @@ import (
 type BannerService interface {
 	CreateBanner(b *service.Banner) error
 	GetBannerList(map[string]interface{}) ([]interface{}, error)
-	GetBannerFromDB(map[string]interface{}) (bool, json.RawMessage, error)
-	GetBannerFromCache(map[string]interface{}) (bool, json.RawMessage, error)
+	GetBannerFromDB(map[string]interface{}, int) (bool, json.RawMessage, error)
+	GetBannerFromCache(map[string]interface{}, int) (bool, json.RawMessage, error)
 }
