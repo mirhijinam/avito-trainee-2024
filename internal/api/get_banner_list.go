@@ -18,7 +18,7 @@ type BannerResponse struct {
 	BannerId  int             `json:"banner_id"`
 	TagIds    []int           `json:"tag_ids"`
 	FeatureId int             `json:"feature_id"`
-	Content   json.RawMessage `json:"content"`
+	Versions  json.RawMessage `json:"content"`
 	IsActive  bool            `json:"is_active"`
 	CreatedAt time.Time       `json:"created_at"`
 	UpdatedAt time.Time       `json:"updated_at"`
@@ -41,9 +41,9 @@ func (h *Handler) GetBannerList() http.HandlerFunc {
 			return
 		}
 
-		bodyContain, err := h.BannerService.GetBannerListFromDB(queryMap)
+		bodyContain, err := h.BannerService.GetBannerList(queryMap)
 		if err != nil {
-			fmt.Errorf("error! failed to GetBannerListFromDB")
+			fmt.Errorf("error! failed to GetBannerList")
 			return
 		}
 		res := make(map[string]interface{})
@@ -55,7 +55,7 @@ func (h *Handler) GetBannerList() http.HandlerFunc {
 			res["banner_id"] = bResponse.BannerId
 			res["feature_id"] = bResponse.FeatureId
 			res["tag_ids"] = bResponse.TagIds
-			res["content"] = bResponse.Content
+			res["content"] = bResponse.Versions
 			res["is_active"] = bResponse.IsActive
 			res["created_at"] = bResponse.CreatedAt
 			res["updated_at"] = bResponse.UpdatedAt

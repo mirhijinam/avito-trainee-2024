@@ -13,7 +13,9 @@ type getBannerRequest struct {
 }
 
 type BannerContentResponse struct {
-	Content json.RawMessage `json:"content"`
+	Content   json.RawMessage `json:"content"`
+	ContentV2 json.RawMessage `json:"content_v2,omitempty"`
+	ContentV3 json.RawMessage `json:"content_v3,omitempty"`
 }
 
 func (h *Handler) GetBanner() http.HandlerFunc {

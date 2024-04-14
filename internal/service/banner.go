@@ -19,11 +19,17 @@ type BannerService struct {
 	cache lru.Cache[feature_tag, Banner]
 }
 
+type Versions struct {
+	ContentV1 json.RawMessage `json:"content"`
+	ContentV2 json.RawMessage `json:"content_v2,omitempty"`
+	ContentV3 json.RawMessage `json:"content_v3,omitempty"`
+}
+
 type Banner struct {
 	Id        int
 	FeatureId int
 	TagId     int
-	Content   json.RawMessage
+	Versions  Versions
 	IsActive  bool
 	CreatedAt time.Time
 	UpdatedAt time.Time
@@ -59,13 +65,13 @@ func (bs *BannerService) CreateBanner(b *Banner) error {
 	}
 	bs.cache.Add(ft, *b)
 	createdBanner, _ := bs.cache.Peek(ft)
-	contentOfBanner, _ := json.Marshal(&createdBanner.Content)
+	contentOfBanner, _ := json.Marshal(&createdBanner.Versions.ContentV1)
 	fmt.Println("debug! cache: created b.Id =", b.Id, string(contentOfBanner))
 
 	return nil
 }
 
-func (bs *BannerService) GetBannerListFromDB(qm map[string]interface{}) ([]interface{}, error) {
+func (bs *BannerService) GetBannerList(qm map[string]interface{}) ([]interface{}, error) {
 	args := make([]interface{}, 4)
 	for i, key := range []string{"featureId", "tagId", "limit", "offset"} {
 		if val, ok := qm[key]; ok && val != nil {
@@ -75,7 +81,7 @@ func (bs *BannerService) GetBannerListFromDB(qm map[string]interface{}) ([]inter
 		}
 	}
 
-	ans, err := bs.repo.SelectBannerListFromDB(args)
+	ans, err := bs.repo.SelectBannerList(args)
 	if err != nil {
 		return nil, err
 	}
@@ -105,5 +111,5 @@ func (bs *BannerService) GetBannerFromCache(qm map[string]interface{}) (bool, js
 		return false, nil, fmt.Errorf("failed to get from cache")
 	}
 
-	return banner.IsActive, banner.Content, nil
+	return banner.IsActive, banner.Versions.ContentV1, nil
 }

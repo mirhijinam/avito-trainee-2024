@@ -2,7 +2,6 @@ package api
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"time"
 
@@ -33,25 +32,31 @@ func (h *Handler) CreateBanner() http.HandlerFunc {
 		err := readJSONBody(w, r, &input)
 		if err != nil {
 			h.badRequestResponse(w, r, err)
+			return
 		}
 
+		versions := service.Versions{
+			ContentV1: input.Content,
+			ContentV2: json.RawMessage("{}"),
+			ContentV3: json.RawMessage("{}"),
+		}
 		for _, tagId := range input.TagIds {
 			b := service.Banner{
 				FeatureId: input.FeatureId,
 				TagId:     tagId,
-				Content:   input.Content,
+				Versions:  versions,
 				IsActive:  input.IsActive,
 				CreatedAt: time.Now(),
 				UpdatedAt: time.Now(),
 			}
+
 			err := h.BannerService.CreateBanner(&b)
-			fmt.Println("debug! api: b.Id =", b.Id)
 			if err != nil {
 				h.badRequestResponse(w, r, err)
-			} else {
-				h.successBannerCreationResponse(w, r)
+				return
 			}
 		}
 
+		h.successBannerCreationResponse(w, r)
 	}
 }
